@@ -1,0 +1,43 @@
+services:
+  - type: worker
+    name: meridien-madness-bulletin
+    runtime: python
+    plan: starter
+    autoDeploy: true
+    buildCommand: pip install -e .
+    startCommand: python -m meridien_bulletin schedule
+    disk:
+      name: bulletin-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: TIMEZONE
+        value: Etc/GMT
+      - key: DAILY_HOUR_GMT
+        value: "8"
+      - key: DAILY_MINUTE_GMT
+        value: "0"
+      - key: WEEKLY_DAY_OF_WEEK
+        value: fri
+      - key: WEEKLY_HOUR_GMT
+        value: "16"
+      - key: WEEKLY_MINUTE_GMT
+        value: "0"
+      - key: MAX_MESSAGES_PER_CHANNEL
+        value: "80"
+      - key: MAX_SOURCE_LINKS
+        value: "8"
+      - key: SLACK_CHANNELS
+        value: "#sales,#product,#marketing-growth,#marketing-brand,#customer-success,#customer-support,#shipped"
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: DATABASE_PATH
+        value: /var/data/bulletins.db
+      - key: SLACK_BOT_TOKEN
+        sync: false
+      - key: SLACK_TARGET_USER_ID
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false

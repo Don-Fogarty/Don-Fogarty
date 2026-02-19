@@ -19,6 +19,13 @@ class BulletinScheduler:
         self.scheduler = BlockingScheduler(timezone=ZoneInfo(settings.timezone_name))
 
     def start(self) -> None:
+        # Fail fast on boot if channel config or Slack access is broken.
+        channels = self.service.slack.resolve_public_channels(self.settings.slack_channels)
+        logger.info(
+            "Startup validation passed. Tracking channels: %s",
+            ", ".join(name for name, _ in channels),
+        )
+
         self.scheduler.add_job(
             self._run_daily,
             trigger="cron",

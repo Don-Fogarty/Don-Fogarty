@@ -40,7 +40,7 @@ If not, it falls back to a deterministic summarizer so delivery still works.
 - A Slack workspace where you can install a Slack App
 - Bot token (`xoxb-...`) for that app
 - Optional: OpenAI API key for better summary quality
-- A place to run the scheduler continuously (local machine, VM, Render, Railway, etc.)
+- A place to run the scheduler continuously (Render recommended)
 
 ## Slack app setup
 
@@ -102,11 +102,41 @@ View reaction success metric:
 meridien-bulletin metrics --days 14
 ```
 
+## Deploy on Render (recommended)
+
+This repo includes a production `render.yaml` blueprint for a background worker.
+
+### Quick deploy
+
+1. Push your branch to GitHub.
+2. In Render, click **New +** → **Blueprint**.
+3. Select this repo.
+4. Set secret env vars:
+   - `SLACK_BOT_TOKEN`
+   - `SLACK_TARGET_USER_ID`
+   - `OPENAI_API_KEY`
+5. Deploy.
+
+The worker will run the scheduler continuously with your fixed schedule:
+
+- Daily: 08:00 GMT
+- Weekly: Friday 16:00 GMT
+
+### Why this setup is production-safe
+
+- Uses a Render worker (always-on process)
+- Uses a persistent disk mounted at `/var/data`
+- Stores KPI history in `/var/data/bulletins.db`
+- Fails fast on startup if Slack channels are invalid
+
+Full runbook: [`docs/RENDER_RUNBOOK.md`](docs/RENDER_RUNBOOK.md)
+
 ## Data storage
 
-The app stores bulletin history and reaction metadata in:
+The app stores bulletin history and reaction metadata in SQLite:
 
-- `.data/bulletins.db`
+- local: `.data/bulletins.db`
+- Render: `/var/data/bulletins.db`
 
 This powers your reaction-rate KPI.
 
